@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/grimoire-banner.jpg" alt="Bloodblade Grimoire Banner" width="100%" />
+  <img src="ChatGPT Image Oct 23, 2025, 12_05_34 AM.png" alt="Bloodblade Grimoire Banner" width="100%" />
 </p>
 
 <h1 align="center">𓄿 Bloodblade — Grimoire</h1>
