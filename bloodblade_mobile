@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Bloodblade — Mobile Grimoire</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Uncial+Antiqua&family=EB+Garamond:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#24170b; --ink2:#3a2a1a; --gild:#a06a1d;
+  --parch1:#fcf3dc; --parch2:#f3e4c2; --parch3:#e6d2a5;
+  --blood:#9b111e; --action:#234f9f; --bonus:#0d7a3a; --react:#995c00; --conc:#7a1f85;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--ink); font-family:"EB Garamond",serif;
+  background:
+    radial-gradient(800px 600px at 20% 0%, rgba(255,255,255,.35), transparent 60%),
+    linear-gradient(180deg,var(--parch1),var(--parch2) 55%,var(--parch3));
+}
+
+/* Header */
+.header{
+  position:sticky; top:0; z-index:20;
+  padding:10px 14px 8px; backdrop-filter:blur(6px);
+  background:linear-gradient(180deg, rgba(255,246,226,.95), rgba(255,246,226,.7));
+  border-bottom:1px solid rgba(160,106,29,.28);
+}
+.h-title{
+  display:flex; gap:10px; align-items:center;
+  font-family:"Cinzel Decorative","Uncial Antiqua",serif; font-weight:700;
+}
+.gem{width:26px;height:26px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, #ffb3b3, #9b111e 60%, #4a050a 100%);
+  box-shadow:0 0 0 2px #3e0a0f inset, 0 0 10px rgba(155,17,30,.45);
+}
+.small{font-size:12px;opacity:.75}
+
+/* Page card */
+.page{
+  max-width:760px; margin:8px auto 96px; /* reserve space for bottom bar */
+  background:rgba(255,255,255,.6); border:1px solid rgba(160,106,29,.28);
+  border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+.page .inner{ padding:14px 14px 18px }
+h1{font-family:"Cinzel Decorative","Uncial Antiqua",serif; font-size:22px; margin:8px 0}
+h2{
+  font-family:"Uncial Antiqua","Cinzel Decorative",serif; font-size:18px;
+  margin:12px 0 6px; position:relative; color:#2c1b10
+}
+h2:after{content:""; position:absolute; left:0; right:0; bottom:-6px; height:2px;
+  background:linear-gradient(90deg,transparent,var(--gild),transparent)}
+p,li{font-size:16px; line-height:1.5}
+
+.box{
+  background:rgba(255,255,255,.7);
+  border:1px solid rgba(160,106,29,.28);
+  border-radius:12px; padding:12px; margin:10px 0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
+}
+
+table{width:100%; border-collapse:collapse; font-size:15px}
+th,td{padding:10px 8px; border-bottom:1px solid rgba(160,106,29,.25)}
+th{text-align:left; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:#5c3b1e}
+
+/* Chips & highlight */
+.tchip{display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:10px; font-size:12px; font-weight:700; color:#fff}
+.t-action{background:var(--action)} .t-bonus{background:var(--bonus)}
+.t-react{background:var(--react)} .t-conc{background:var(--conc)}
+.highlight .is-action{box-shadow:0 0 0 2px var(--action) inset, 0 0 0 9999px rgba(35,79,159,.06)}
+.highlight .is-bonus{box-shadow:0 0 0 2px var(--bonus) inset, 0 0 0 9999px rgba(13,122,58,.06)}
+.highlight .is-react{box-shadow:0 0 0 2px var(--react) inset, 0 0 0 9999px rgba(153,92,0,.06)}
+.highlight .is-conc{box-shadow:0 0 0 2px var(--conc) inset, 0 0 0 9999px rgba(122,31,133,.06)}
+.dimmed{opacity:.35; filter:grayscale(.3)}
+
+.pill{font-size:12px;padding:2px 6px;border-radius:999px;background:rgba(160,106,29,.18);border:1px solid rgba(160,106,29,.28)}
+
+/* Accordion (native details/summary) */
+.acc{margin:8px 0}
+.acc summary{
+  list-style:none; cursor:pointer; user-select:none;
+  padding:10px 12px; border-radius:10px; font-weight:800;
+  background:linear-gradient(#fff9ef,#f3e4c2);
+  border:1px solid rgba(160,106,29,.28)
+}
+.acc[open] summary{box-shadow:0 0 0 2px rgba(160,106,29,.28) inset}
+.acc .acc-body{padding:8px 2px}
+
+/* Sticky bottom bar for filters & quick links */
+.bottom{
+  position:fixed; left:0; right:0; bottom:0; z-index:25;
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg, rgba(255,246,226,.95), rgba(255,246,226,.9));
+  border-top:1px solid rgba(160,106,29,.28); box-shadow:0 -8px 20px rgba(0,0,0,.1);
+}
+.row{display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+.toggle{
+  flex:1 1 auto; display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:10px 8px; border-radius:12px; font-weight:800; font-size:14px;
+  border:1px solid rgba(0,0,0,.2); background:linear-gradient(#fff9ef,#f3e4c2);
+}
+.toggle.active{box-shadow:0 0 0 2px var(--gild) inset, 0 0 12px rgba(160,106,29,.35)}
+.smallbtn{padding:10px 12px; border-radius:12px; border:1px solid rgba(0,0,0,.2); background:linear-gradient(#fff9ef,#f3e4c2); font-weight:800}
+
+/* Print */
+@media print{
+  .header,.bottom{display:none}
+  .page{margin:0 auto}
+}
+</style>
+</head>
+<body>
+
+<!-- Top -->
+<header class="header">
+  <div class="h-title">
+    <div class="gem" aria-hidden="true"></div>
+    <div>
+      <div style="font-size:16px;line-height:1">Bloodblade — Grimoire (Mobile)</div>
+      <div class="small">Fighter/Warlock of the Bloodblade</div>
+    </div>
+  </div>
+</header>
+
+<!-- Content card -->
+<main class="page" id="page">
+  <div class="inner">
+    <h1>𓄿 Bloodblade — Quick Reference</h1>
+
+    <!-- Core -->
+    <h2 id="core">❖ Core Kit</h2>
+    <details class="acc" open>
+      <summary>Overview</summary>
+      <div class="acc-body">
+        <div class="box">
+          <p><b>Proficiencies.</b> Light/Medium/Heavy armor, Shields; Simple & Martial weapons.
+          <br><b>Saving Throws.</b> <b>WIS, CHA</b>
+          <br><b>Fighting Style — Defense.</b> While armored, <b>+1 AC</b>.
+          <br><b>Sanguine Warrior.</b> Use <b>CHA</b> for attack & damage with <b>Bloodblade/pact weapon</b>.
+          <br><b>Thirsting Blade.</b> When you take the <span class="tchip t-action">Action</span> with your pact weapon, you can attack <b>twice</b>.</p>
+
+          <p><b>Summon Bloodblade (L1).</b> Conjure blood-infused weapon; take <b>1d4</b> damage. Damage is <b>magical</b>. <span class="pill">Counts as Pact Weapon</span></p>
+        </div>
+      </div>
+    </details>
+
+    <!-- BP -->
+    <h2 id="bp">❖ Blood Points (BP)</h2>
+    <details class="acc" open>
+      <summary>Resource & Generation</summary>
+      <div class="acc-body">
+        <div class="box">
+          <p><b>Pool:</b> Max <b>10</b>.</p>
+          <ul>
+            <li><b>Slaughter Ritual</b> — <span class="tchip t-bonus">Bonus</span>: Sacrifice <b>3 HP → 1 BP</b>.</li>
+            <li><b>Lifesteal</b> — Every <b>15 HP</b> dealt → <b>1 BP</b>.</li>
+            <li><b>Kills</b> — <b>2 BP</b> (Med/Lg); <b>3–5 BP</b> (Huge/Gargantuan).</li>
+          </ul>
+        </div>
+      </div>
+    </details>
+
+    <!-- Mark & Defiance -->
+    <h2 id="markdef">❖ Mark & Defiance</h2>
+    <details class="acc" open>
+      <summary>L3 Mark & L10 Defiance</summary>
+      <div class="acc-body">
+        <div class="box is-bonus" data-type="bonus">
+          <p><b>Marked for Death (L3)</b> — <span class="tchip t-bonus">Bonus</span>, 30 ft, 1 min. Add proficiency to damage vs target.
+          <br><b>On Crit:</b> regain <b>BP = CHA</b>. <b>On Kill:</b> regain <b>HP = Warlock level + CHA</b>, gain <b>+2 BP</b>. <span class="pill">1/short or long rest</span></p>
+        </div>
+        <div class="box is-react" data-type="react">
+          <p><b>Bloodbound Defiance (L10)</b> — <span class="tchip t-react">Reaction</span> when a <em>Marked</em> creature hits you; roll d6. On 4+ choose:
+          <br>1) <b>Block</b> — damage 0. &nbsp; 2) <b>Bloodlash</b> — take ½ dmg; attacker takes necrotic = CHA + Warlock level.
+          <br><span class="pill">Uses: CHA mod / long rest</span></p>
+        </div>
+      </div>
+    </details>
+
+    <!-- Blood Arts -->
+    <h2 id="arts">❖ Blood Arts (BP-Powered)</h2>
+    <details class="acc" open>
+      <summary>Powers List</summary>
+      <div class="acc-body">
+        <div class="box">
+          <table id="artsTable">
+            <thead><tr><th>Power</th><th>Cost</th><th>Type</th><th>Range/Duration</th><th>Effect</th></tr></thead>
+            <tbody>
+              <tr class="is-action" data-type="action">
+                <td><b>Blood Bolt</b></td><td>1 BP</td>
+                <td><span class="tchip t-action">Action</span></td><td>Ranged</td><td>1d6 piercing + 1d6 necrotic</td>
+              </tr>
+              <tr class="is-action" data-type="action">
+                <td><b>Blood Slash</b></td><td>2 BP</td>
+                <td><span class="tchip t-action">Action</span></td><td>Ranged</td><td>2d6 slashing + 2d6 necrotic + CHA</td>
+              </tr>
+              <tr class="is-action is-bonus" data-type="action bonus">
+                <td><b>Sanguine Spears</b></td><td>4 BP</td>
+                <td><span class="tchip t-action">Action</span> / <span class="tchip t-bonus">Bonus</span></td>
+                <td>Create 3; fire 1/turn</td><td>On hit 2d6 piercing + 2d6 necrotic + CHA (Draconic: +3d6 lightning, homing)</td>
+              </tr>
+              <tr class="is-action" data-type="action">
+                <td><b>Sense Blood</b></td><td>1 BP</td>
+                <td><span class="tchip t-action">Action</span></td><td>1 min</td><td>Advantage on Perception & Insight vs living creatures with blood</td>
+              </tr>
+              <tr class="is-bonus is-conc" data-type="bonus conc">
+                <td><b>Crimson Blade</b></td><td>2 BP</td>
+                <td><span class="tchip t-bonus">Bonus</span> <span class="tchip t-conc">Conc</span></td>
+                <td>—</td><td>+2d8 necrotic; adv. vs bloodied (&lt;50% HP); crit heals 5 HP; ends if dropped</td>
+              </tr>
+              <tr class="is-action" data-type="action">
+                <td><b>Ichorous Blood</b></td><td>5 BP</td>
+                <td><span class="tchip t-action">Action</span></td><td>10 min</td><td>Temp HP = 10 + Warlock lvl; reduce physical by 4 (min 1); melee hitters take 4 acid</td>
+              </tr>
+              <tr class="is-action" data-type="action">
+                <td><b>Sanguine Doom</b></td><td>8 BP</td>
+                <td><span class="tchip t-action">Action</span></td><td>120 ft → 30 ft rad.</td><td>Extinguish light; blood rain; 4d6 necrotic; WIS save or <em>Doomed</em> (your next attack auto-crit)</td>
+              </tr>
+              <tr>
+                <td><b>Bloody Smite</b></td><td>2 BP per step</td>
+                <td>—</td><td>—</td><td>On a hit add +1d6 per 2 BP (max BP = proficiency bonus)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+
+    <!-- Maneuvers -->
+    <h2 id="maneuvers">❖ Maneuver Mastery</h2>
+    <details class="acc" open>
+      <summary>Battle Master Synergy</summary>
+      <div class="acc-body">
+        <div class="box">
+          <p>Spend <b>2 BP</b> instead of a superiority die (<code>d8</code>); save DCs use <b>CHA</b>. Choose any two:
+            <br>• Precision Attack • Commanding Presence • <span class="tchip t-react">Brace (Reaction)</span> • Trip Attack • Cleave (2 m cone; up to 3 targets; ½ weapon dmg each)</p>
+        </div>
+      </div>
+    </details>
+
+    <!-- Fighter -->
+    <h2 id="fighter">❖ Fighter Techniques</h2>
+    <details class="acc" open>
+      <summary>Second Wind & Action Surge</summary>
+      <div class="acc-body">
+        <div class="box is-bonus" data-type="bonus">
+          <p><b>Second Wind</b> — <span class="tchip t-bonus">Bonus</span> regain <b>1d10 + fighter level</b> HP. <span class="pill">1/short rest</span></p>
+        </div>
+        <div class="box is-action" data-type="action">
+          <p><b>Action Surge</b> — take <span class="tchip t-action">one extra Action</span>. <span class="pill">1/short rest (2 at L17; not same turn)</span></p>
+        </div>
+      </div>
+    </details>
+
+    <!-- Feats & Invocations -->
+    <h2 id="feats">❖ Feats & Invocations</h2>
+    <details class="acc" open>
+      <summary>Feats + Eldritch Invocations</summary>
+      <div class="acc-body">
+        <div class="box">
+          <p><b>Great Weapon Master.</b> Bonus attack on crit/kill; choose −5 to hit for +10 damage with a heavy weapon.
+          <br><b>Telepathic.</b> +1 to INT/WIS/CHA (max 20); 60 ft telepathy; <i>Detect Thoughts</i> 1/long rest (or slot ≥ 2nd).</p>
+          <p><b>Invocations.</b> Agonizing Blast • Eldritch Mind • Mask of Many Faces • Sculptor of Flesh • Thirsting Blade</p>
+        </div>
+      </div>
+    </details>
+
+    <!-- Relics -->
+    <h2 id="relics">❖ Relics & Arms</h2>
+    <details class="acc" open>
+      <summary>Magic Items & Weapons</summary>
+      <div class="acc-body">
+        <div class="box">
+          <p><b>Pearl of Power (ring).</b> Restore 1 warlock slot / long rest.
+          <br><b>Chains of Life (bandolier).</b> Stores 6 BP.
+          <br><b>Eldritch Blood Bolt (Eldritch Blast).</b> 120 ft; beams 1/2/3/4 (1st/5th/11th/17th); 1d10 per beam.
+          <br><b>Dragonslayer Greatsword.</b> +1 atk & dmg; vs dragons: +3d6 slashing.</p>
+        </div>
+      </div>
+    </details>
+
+    <!-- Routines -->
+    <h2 id="routines">❖ Combat Routines & Trackers</h2>
+    <details class="acc" open>
+      <summary>Openers & Rest Boxes</summary>
+      <div class="acc-body">
+        <div class="box">
+          <ol>
+            <li><span class="tchip t-bonus">Bonus</span> Marked for Death → <span class="tchip t-bonus">Bonus</span> Crimson Blade → Attack ×2 (Thirsting Blade)</li>
+            <li><span class="tchip t-action">Action</span> Sanguine Doom → Cleave / Spears cleanup</li>
+            <li><span class="tchip t-action">Action</span> Ichorous Blood then <span class="tchip t-react">Brace</span> on approach</li>
+          </ol>
+          <p style="margin:.6rem 0 .3rem"><b>Rest Trackers:</b></p>
+          <div id="restTrackers" class="trackers">
+            <label><input type="checkbox" data-key="mark"> Marked for Death</label><br/>
+            <label><input type="checkbox" data-key="sw"> Second Wind</label><br/>
+            <label><input type="checkbox" data-key="as"> Action Surge</label><br/>
+            <label><input type="checkbox" data-key="bd1"> Bloodbound Defiance (1)</label>
+            <label><input type="checkbox" data-key="bd2"> (2)</label>
+            <label><input type="checkbox" data-key="bd3"> (3)</label>
+            <label><input type="checkbox" data-key="bd4"> (4)</label><br/>
+            <label><input type="checkbox" data-key="poly"> Polymorph</label>
+          </div>
+        </div>
+      </div>
+    </details>
+
+  </div>
+</main>
+
+<!-- Sticky bottom filter bar -->
+<nav class="bottom">
+  <div class="row">
+    <button class="toggle" data-toggle="action">⚔️ Action</button>
+    <button class="toggle" data-toggle="bonus">🗡️ Bonus</button>
+    <button class="toggle" data-toggle="react">↩️ React</button>
+    <button class="toggle" data-toggle="conc">🧠 Conc</button>
+    <button class="smallbtn" id="reset">Reset</button>
+    <button class="smallbtn" onclick="window.print()">Print</button>
+  </div>
+</nav>
+
+<script>
+/* Filters / highlights */
+const page = document.getElementById('page');
+const toggles = {action:false, bonus:false, react:false, conc:false};
+function applyFilters(){
+  const any = Object.values(toggles).some(Boolean);
+  page.classList.toggle('highlight', any);
+  const nodes = page.querySelectorAll('[data-type], .is-action, .is-bonus, .is-react, .is-conc');
+  nodes.forEach(n => n.classList.toggle('dimmed', any));
+  if(!any){ nodes.forEach(n => n.classList.remove('dimmed')); return; }
+  if(toggles.action){
+    page.querySelectorAll('.is-action,[data-type*="action"]').forEach(n=>n.classList.remove('dimmed'));
+  }
+  if(toggles.bonus){
+    page.querySelectorAll('.is-bonus,[data-type*="bonus"]').forEach(n=>n.classList.remove('dimmed'));
+  }
+  if(toggles.react){
+    page.querySelectorAll('.is-react,[data-type*="react"]').forEach(n=>n.classList.remove('dimmed'));
+  }
+  if(toggles.conc){
+    page.querySelectorAll('.is-conc,[data-type*="conc"]').forEach(n=>n.classList.remove('dimmed'));
+  }
+}
+document.querySelectorAll('[data-toggle]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const k = btn.getAttribute('data-toggle');
+    toggles[k] = !toggles[k];
+    btn.classList.toggle('active', toggles[k]);
+    applyFilters();
+  });
+});
+document.getElementById('reset').addEventListener('click', ()=>{
+  for(const k in toggles) toggles[k]=false;
+  document.querySelectorAll('[data-toggle]').forEach(b=>b.classList.remove('active'));
+  applyFilters();
+});
+
+/* Local storage for rest trackers */
+const boxWrap = document.getElementById('restTrackers');
+const PREFIX = 'bb_mobile_';
+function loadChecks(){
+  boxWrap.querySelectorAll('input[type="checkbox"][data-key]').forEach(cb=>{
+    const k = PREFIX + cb.dataset.key;
+    cb.checked = localStorage.getItem(k) === '1';
+    cb.addEventListener('change', ()=> localStorage.setItem(k, cb.checked ? '1':'0'));
+  });
+}
+loadChecks();
+
+/* Keyboard shortcuts (optional on desktop): A,B,R,C / Esc */
+window.addEventListener('keydown', (e)=>{
+  const key = e.key.toLowerCase();
+  const map = {a:'action', b:'bonus', r:'react', c:'conc'};
+  if(map[key]){
+    document.querySelector(`[data-toggle="${map[key]}"]`)?.click();
+  }else if(key==='escape'){
+    document.getElementById('reset').click();
+  }
+});
+</script>
+</body>
+</html>
