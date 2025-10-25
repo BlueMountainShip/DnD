@@ -1,4 +1,8 @@
 <p align="center">
+  <img src="file_000000005b6861f584a96fb23325edf7.png" alt="Bloodblade Grimoire Banner" width="100%" />
+</p>
+
+<p align="center">
   <img src="ChatGPT Image Oct 23, 2025, 12_05_34 AM.png" alt="Bloodblade Grimoire Banner" width="100%" />
 </p>
 
